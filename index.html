@@ -4698,7 +4698,40 @@
       }
     }
 
+    function handleLogoUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) {
+        notify('Imagem muito grande. Use um arquivo menor que 2MB.', 'error');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const base64 = e.target.result;
+        localStorage.setItem('aurum_company_logo', base64);
+        const preview = document.getElementById('company-logo-preview');
+        if (preview) {
+          preview.innerHTML = `<img src="${base64}" style="width:100%;height:100%;object-fit:cover;">`;
+        }
+        notify('Logo atualizado com sucesso!', 'success');
+      };
+      reader.readAsDataURL(file);
+      // Reset input so same file can be re-selected
+      event.target.value = '';
+    }
+
+    function handleLogoRemove() {
+      localStorage.removeItem('aurum_company_logo');
+      const preview = document.getElementById('company-logo-preview');
+      if (preview) {
+        const cfg = JSON.parse(localStorage.getItem('aurum_config') || '{}');
+        preview.innerHTML = (cfg.empresa || 'ME').slice(0, 2).toUpperCase();
+      }
+      notify('Logo removido.', 'info');
+    }
+
     function handleLogout() {
+
       console.log('[debug] handleLogout() iniciado');
       sessionStorage.removeItem('meuestoque_logged');
       sessionStorage.removeItem('aurum_logged');
@@ -5569,11 +5602,18 @@
               
               <!-- Card de Imagem da Empresa -->
               <div class="company-avatar-panel" style="padding: 1.25rem; height: 100%;">
-                <div class="company-avatar-circle" style="font-family: 'Cinzel', serif; width: 64px; height: 64px; font-size: 1.2rem; border-radius: 12px; background: rgba(200, 168, 75, 0.15); border: 1.5px solid var(--gold);">${(cfg.empresa || 'ME').slice(0,2).toUpperCase()}</div>
+                <div id="company-logo-preview" style="width:64px;height:64px;border-radius:12px;background:rgba(200,168,75,0.15);border:1.5px solid var(--gold);display:flex;align-items:center;justify-content:center;overflow:hidden;font-family:'Cinzel',serif;font-size:1.2rem;color:var(--gold);">
+                  ${(()=>{ const s=localStorage.getItem('aurum_company_logo'); return s ? `<img src="${s}" style="width:100%;height:100%;object-fit:cover;">` : (cfg.empresa||'ME').slice(0,2).toUpperCase(); })()}
+                </div>
                 <div class="company-avatar-label">Logotipo / Brasão</div>
                 <div class="company-avatar-note" style="font-size: 11px;">Imagem personalizada para relatórios e cabeçalhos</div>
-                <button class="btn btn-ghost btn-sm company-avatar-action" style="font-size: 11px; padding: 6px 12px; min-height: auto; width: auto; margin-top: 4px;" onclick="notify('Funcionalidade de logo ainda não implementada', 'info')">Alterar imagem</button>
+                <input type="file" id="logo-file-input" accept="image/*" style="display:none;" onchange="handleLogoUpload(event)">
+                <div style="display:flex;gap:6px;margin-top:4px;flex-wrap:wrap;">
+                  <button class="btn btn-ghost btn-sm company-avatar-action" style="font-size:11px;padding:6px 12px;min-height:auto;width:auto;" onclick="document.getElementById('logo-file-input').click()">Alterar imagem</button>
+                  <button class="btn btn-ghost btn-sm" style="font-size:11px;padding:6px 12px;min-height:auto;width:auto;color:rgba(255,80,80,0.8);border-color:rgba(255,80,80,0.2);" onclick="handleLogoRemove()">Remover</button>
+                </div>
               </div>
+
             </div>
           </div>
 
