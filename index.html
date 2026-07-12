@@ -5515,6 +5515,61 @@
     }
 
     function clearEntries() { if (!entries.length) return; if (!confirm('Limpar todo o histórico de entradas?')) return; entries = []; saveDB(); notify('Histórico de entradas limpo', 'ok'); render(); }
+
+    async function clearAllSystemData() {
+      if (!confirm('ATENÇÃO: Isso irá excluir permanentemente TODOS os dados do sistema (produtos, fornecedores, entradas, saídas, categorias, tags, pedidos salvos) de forma irreversível. Deseja continuar?')) return;
+      if (!confirm('Tem certeza absoluta? Essa ação NÃO poderá ser desfeita e apagará os dados na nuvem também.')) return;
+
+      // 1. Limpar localmente
+      products = [];
+      suppliers = [];
+      log = [];
+      entries = [];
+      cart = [];
+      savedOrders = [];
+      categories = [];
+      tags = [];
+
+      localStorage.removeItem('meuestoque_products');
+      localStorage.removeItem('meuestoque_suppliers');
+      localStorage.removeItem('meuestoque_log');
+      localStorage.removeItem('meuestoque_entries');
+      localStorage.removeItem('meuestoque_cart');
+      localStorage.removeItem('meuestoque_cartBuyer');
+      localStorage.removeItem('meuestoque_orders');
+      localStorage.removeItem('meuestoque_categories');
+      localStorage.removeItem('meuestoque_tags');
+      localStorage.removeItem('meuestoque_deleted_products');
+      localStorage.removeItem('meuestoque_deleted_suppliers');
+
+      // 2. Limpar do Supabase se conectado
+      if (supabaseClient) {
+        notify('Limpando dados da nuvem...', 'info');
+        try {
+          // Deleta todos os logs primeiro
+          const { error: lErr } = await supabaseClient.from('log').delete().gt('id', 0);
+          if (lErr) throw lErr;
+
+          // Deleta todos os produtos
+          const { error: pErr } = await supabaseClient.from('products').delete().neq('id', 'non-existent-placeholder-id');
+          if (pErr) throw pErr;
+
+          // Deleta todos os fornecedores
+          const { error: sErr } = await supabaseClient.from('suppliers').delete().neq('id', 'non-existent-placeholder-id');
+          if (sErr) throw sErr;
+
+          notify('Banco de dados da nuvem limpo com sucesso.', 'ok');
+        } catch (err) {
+          console.error('Erro ao limpar nuvem:', err);
+          notify('Falha ao limpar alguns dados da nuvem no Supabase.', 'err');
+        }
+      }
+
+      saveDBLocalOnly();
+      updateCounters();
+      render();
+      notify('Todos os dados locais foram limpos.', 'ok');
+    }
     function addCategory() { const value = document.getElementById('new-category')?.value.trim(); if (!value) { notify('Digite uma categoria', 'info'); return; } if (categories.includes(value)) { notify('Categoria já existe', 'info'); return; } categories.push(value); saveDB(); render(); notify(`Categoria "${value}" adicionada`, 'ok'); }
     function removeCategory(value) { categories = categories.filter(c => c !== value); saveDB(); render(); notify(`Categoria "${value}" removida`, 'info'); }
     function addTag() { const value = document.getElementById('new-tag')?.value.trim(); if (!value) { notify('Digite uma tag', 'info'); return; } if (tags.includes(value)) { notify('Tag já existe', 'info'); return; } tags.push(value); saveDB(); render(); notify(`Tag "${value}" adicionada`, 'ok'); }
@@ -5840,6 +5895,14 @@
                 <div class="csub" style="color: var(--err);">Exclui de forma definitiva os logs de saídas</div>
               </div>
               <button class="btn btn-red btn-sm" style="min-width: 140px; justify-content: center;" onclick="clearLog()">Limpar</button>
+            </div>
+
+            <div class="permission-row" style="padding: 0.6rem 0; border-top: 1px solid rgba(255,255,255,0.06);">
+              <div>
+                <div class="clbl">Resetar sistema</div>
+                <div class="csub" style="color: var(--err);">Exclui permanentemente todos os produtos, fornecedores, saídas, entradas e configurações</div>
+              </div>
+              <button class="btn btn-red btn-sm" style="min-width: 140px; justify-content: center; background: rgba(255, 71, 87, 0.15); border-color: rgba(255, 71, 87, 0.25); color: #ff4757;" onclick="clearAllSystemData()">Resetar tudo</button>
             </div>
           </div>
         `,
