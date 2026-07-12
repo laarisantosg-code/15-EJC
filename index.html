@@ -4297,13 +4297,48 @@
       }
     }
 
+    function trackDeletedProduct(id) {
+      let del = [];
+      try { del = JSON.parse(localStorage.getItem('meuestoque_deleted_products') || '[]'); } catch(e) {}
+      if (!del.includes(id)) {
+        del.push(id);
+        localStorage.setItem('meuestoque_deleted_products', JSON.stringify(del));
+      }
+    }
+
+    function removeDeletedProductTracking(id) {
+      let del = [];
+      try { del = JSON.parse(localStorage.getItem('meuestoque_deleted_products') || '[]'); } catch(e) {}
+      del = del.filter(x => x !== id);
+      localStorage.setItem('meuestoque_deleted_products', JSON.stringify(del));
+    }
+
+    function trackDeletedSupplier(id) {
+      let del = [];
+      try { del = JSON.parse(localStorage.getItem('meuestoque_deleted_suppliers') || '[]'); } catch(e) {}
+      if (!del.includes(id)) {
+        del.push(id);
+        localStorage.setItem('meuestoque_deleted_suppliers', JSON.stringify(del));
+      }
+    }
+
+    function removeDeletedSupplierTracking(id) {
+      let del = [];
+      try { del = JSON.parse(localStorage.getItem('meuestoque_deleted_suppliers') || '[]'); } catch(e) {}
+      del = del.filter(x => x !== id);
+      localStorage.setItem('meuestoque_deleted_suppliers', JSON.stringify(del));
+    }
+
     async function deleteProductFromSupabase(id) {
-      if (!supabaseClient) return;
+      if (!supabaseClient) return true;
       try {
         const { error } = await supabaseClient.from('products').delete().eq('id', id);
         if (error) throw error;
+        removeDeletedProductTracking(id);
+        return true;
       } catch (err) {
         console.error("Erro ao deletar produto no Supabase:", err);
+        return false;
       }
     }
 
@@ -4318,12 +4353,15 @@
     }
 
     async function deleteSupplierFromSupabase(id) {
-      if (!supabaseClient) return;
+      if (!supabaseClient) return true;
       try {
         const { error } = await supabaseClient.from('suppliers').delete().eq('id', id);
         if (error) throw error;
+        removeDeletedSupplierTracking(id);
+        return true;
       } catch (err) {
         console.error("Erro ao deletar fornecedor no Supabase:", err);
+        return false;
       }
     }
 
@@ -4408,6 +4446,19 @@
 
       if (supabaseClient) {
         try {
+          // Process pending deletions first
+          let delProds = [];
+          try { delProds = JSON.parse(localStorage.getItem('meuestoque_deleted_products') || '[]'); } catch(e) {}
+          for (const id of delProds) {
+            await deleteProductFromSupabase(id);
+          }
+
+          let delSupps = [];
+          try { delSupps = JSON.parse(localStorage.getItem('meuestoque_deleted_suppliers') || '[]'); } catch(e) {}
+          for (const id of delSupps) {
+            await deleteSupplierFromSupabase(id);
+          }
+
           const { data: dbCfg, error: cfgErr } = await supabaseClient.from('config').select('*').single();
           if (!cfgErr && dbCfg) {
             const { id, created_at, ...rest } = dbCfg;
@@ -4416,16 +4467,20 @@
 
           const { data: dbProducts, error: prodErr } = await supabaseClient.from('products').select('*').order('created_at', { ascending: true });
           if (!prodErr && dbProducts && dbProducts.length > 0) {
-            products = dbProducts.map(x => ({
-              id: x.id,
-              name: x.name,
-              cat: x.cat,
-              desc: x.desc,
-              supplier: x.supplier,
-              price: parseFloat(x.price),
-              stock: parseInt(x.stock),
-              min: parseInt(x.min)
-            }));
+            let activeDelProds = [];
+            try { activeDelProds = JSON.parse(localStorage.getItem('meuestoque_deleted_products') || '[]'); } catch(e) {}
+            products = dbProducts
+              .filter(x => !activeDelProds.includes(x.id))
+              .map(x => ({
+                id: x.id,
+                name: x.name,
+                cat: x.cat,
+                desc: x.desc,
+                supplier: x.supplier,
+                price: parseFloat(x.price),
+                stock: parseInt(x.stock),
+                min: parseInt(x.min)
+              }));
           } else if (!prodErr && dbProducts && dbProducts.length === 0 && products.length > 0) {
             // Supabase vazio, mas temos dados locais — sincronizar para a nuvem
             for (const p of products) await syncProductToSupabase(p);
@@ -4433,7 +4488,9 @@
 
           const { data: dbSuppliers, error: suppErr } = await supabaseClient.from('suppliers').select('*').order('created_at', { ascending: true });
           if (!suppErr && dbSuppliers && dbSuppliers.length > 0) {
-            suppliers = dbSuppliers;
+            let activeDelSupps = [];
+            try { activeDelSupps = JSON.parse(localStorage.getItem('meuestoque_deleted_suppliers') || '[]'); } catch(e) {}
+            suppliers = dbSuppliers.filter(x => !activeDelSupps.includes(x.id));
           } else if (!suppErr && dbSuppliers && dbSuppliers.length === 0 && suppliers.length > 0) {
             for (const s of suppliers) await syncSupplierToSupabase(s);
           }
@@ -6474,6 +6531,7 @@
     }
     function delProd(id) {
       const p = products.find(x => String(x.id) === String(id));
+      trackDeletedProduct(id);
       products = products.filter(x => x.id !== id);
       saveDB();
       if (supabaseClient) deleteProductFromSupabase(id);
@@ -6526,6 +6584,7 @@
     }
     function delSupp(id) {
       const s = suppliers.find(x => x.id === id);
+      trackDeletedSupplier(id);
       suppliers = suppliers.filter(x => x.id !== id);
       saveDB();
       if (supabaseClient) deleteSupplierFromSupabase(id);
