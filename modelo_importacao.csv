@@ -1,0 +1,5 @@
+Código;Nome;Categoria;Descrição;Fornecedor;Preço;Estoque;Mínimo
+MEU-001;Refrigerante Lata;Bebidas;Refrigerante de cola 350ml;Distribuidora Coca;5,00;100;15
+MEU-002;Chocolate Barra;Doces;Chocolate ao leite 90g;Distribuidora Nestlé;7,50;50;10
+MEU-003;Salgadinho Piraque;Salgados;Salgadinho de trigo sabor queijo 100g;Distribuidora Piraque;4,20;80;12
+;Bala de Goma;Doces;Pacote de bala de goma de frutas;Distribuidora Doces;2,50;120;20
