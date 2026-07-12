@@ -4083,28 +4083,16 @@
 
   <script>
     /* ══ STATE ══ */
-    let products = [
-      { id: 'MEU-001', name: 'Cabo USB-C 2m', cat: 'Eletrônicos', desc: 'Carregamento rápido 100W, transferência 3.0', supplier: 'TechLine Dist.', price: 24.90, stock: 45, min: 10 },
-      { id: 'MEU-002', name: 'Mouse sem fio', cat: 'Periféricos', desc: 'Óptico 2.4GHz, receptor nano USB, 1600 DPI', supplier: 'Periféricos BR', price: 89.90, stock: 8, min: 15 },
-      { id: 'MEU-003', name: 'Teclado mecânico', cat: 'Periféricos', desc: 'Compacto 75%, switch blue, retroiluminado', supplier: 'Periféricos BR', price: 249.00, stock: 0, min: 5 },
-      { id: 'MEU-004', name: 'Monitor 24" Full HD', cat: 'Monitores', desc: 'IPS 144Hz, 1ms, HDR400, HDMI e DisplayPort', supplier: 'Display Corp.', price: 899.00, stock: 12, min: 3 },
-      { id: 'MEU-005', name: 'Headset gamer', cat: 'Áudio', desc: '7.1 surround virtual, microfone retrátil USB', supplier: 'AudioMax Imp.', price: 179.00, stock: 23, min: 8 },
-      { id: 'MEU-006', name: 'Webcam 4K', cat: 'Eletrônicos', desc: 'Autofoco AI, campo 90°, microfone duplo', supplier: 'TechLine Dist.', price: 349.00, stock: 4, min: 5 },
-    ];
-    let suppliers = [
-      { id: 'SUP-001', name: 'TechLine Dist.', cat: 'Eletrônicos', email: 'compras@techline.com.br', phone: '(11) 4002-8922', cnpj: '12.345.678/0001-90', city: 'São Paulo, SP', status: 'ativo' },
-      { id: 'SUP-002', name: 'Periféricos BR', cat: 'Periféricos', email: 'vendas@perifericosbr.com', phone: '(11) 3333-4444', cnpj: '98.765.432/0001-10', city: 'Campinas, SP', status: 'ativo' },
-      { id: 'SUP-003', name: 'Display Corp.', cat: 'Monitores', email: 'b2b@displaycorp.com', phone: '(21) 2222-3333', cnpj: '55.111.222/0001-33', city: 'Rio de Janeiro, RJ', status: 'ativo' },
-      { id: 'SUP-004', name: 'AudioMax Imp.', cat: 'Áudio', email: 'import@audiomax.com.br', phone: '(19) 9999-8888', cnpj: '33.444.555/0001-77', city: 'Indaiatuba, SP', status: 'ativo' },
-    ];
+    let products = [];
+    let suppliers = [];
     let log = [];
     let entries = [];
     let cart = [];
     let cartBuyer = '';
     let savedOrders = [];
     let pendingPayment = null;
-    let categories = ['Eletrônicos', 'Periféricos', 'Monitores', 'Áudio'];
-    let tags = ['Gamer', 'USB', 'Wireless', '4K'];
+    let categories = [];
+    let tags = [];
     let editId = null;
     const storedPage = localStorage.getItem('meuestoque_page');
     const validPages = ['estoque','saidas','pedidos','entradas','fornecedores','relatorios','configuracoes'];
@@ -4120,7 +4108,8 @@
     const defaultCfg = { empresa: 'Caixa Bomboniere', cnpj: '', email: '', address: '', city: '', alertMin: true, alertEmail: false, alertZero: true, defaultMin: 5, currency: 'R$ — Real brasileiro', darkMode: true, supabaseUrl: 'https://qbqbcjcnvhvsjwrfodzs.supabase.co', supabaseKey: 'sb_publishable_lj8RUwix0bLES9XbdxaLUg_dJ0Gy6rE' };
     let cfg = { ...defaultCfg };
     let admins = [];
-    let nProd = 7, nSupp = 5;
+    let nProd = 1, nSupp = 1;
+
 
     /* ══ PERSISTENCE ══ */
     let supabaseClient = null;
