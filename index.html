@@ -1201,14 +1201,14 @@
     }
 
     .sc {
-      background: var(--s2);
-      border: 1px solid rgba(255, 255, 255, 0.05);
-      border-radius: var(--r);
-      padding: 0.85rem 1.1rem;
+      background: linear-gradient(135deg, rgba(255,255,255,0.015) 0%, rgba(255,255,255,0.005) 100%), var(--s2);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      border-radius: 14px;
+      padding: 1.1rem 1.25rem;
       position: relative;
       overflow: hidden;
-      transition: all 0.2s ease;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, .04);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 20px rgba(0, 0, 0, .1), inset 0 1px 0 rgba(255,255,255,0.04);
       display: grid;
       grid-template-areas:
         "label icon"
@@ -1216,13 +1216,24 @@
         "subtitle subtitle";
       grid-template-columns: 1fr auto;
       align-items: center;
-      gap: 1px;
+      gap: 2px;
     }
 
     .sc:hover {
-      border-color: var(--gold-bds);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 25px rgba(0, 0, 0, .12);
+      border-color: rgba(212, 175, 55, 0.28);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, .28), 0 0 15px rgba(212, 175, 55, 0.06);
+    }
+
+    .light .sc {
+      background: #ffffff;
+      border: 1px solid rgba(15, 23, 42, .06);
+      box-shadow: 0 4px 18px rgba(15, 23, 42, .03);
+    }
+    
+    .light .sc:hover {
+      border-color: rgba(212, 175, 55, 0.4);
+      box-shadow: 0 10px 25px rgba(15, 23, 42, .06);
     }
 
     .sc::before {
@@ -1238,74 +1249,122 @@
     }
 
     .sc:hover::before {
-      opacity: .5;
+      opacity: .6;
     }
 
     .si {
       grid-area: icon;
-      align-self: flex-start;
+      align-self: center;
       justify-self: flex-end;
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      background: var(--gold-bg);
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(212, 175, 55, 0.08);
+      border: 1px solid rgba(212, 175, 55, 0.15);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-left: 8px;
+      margin-left: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .sc:hover .si {
+      transform: scale(1.08) rotate(3deg);
     }
 
     .si svg {
-      width: 14px;
-      height: 14px;
+      width: 18px;
+      height: 18px;
       color: var(--gold);
+    }
+
+    /* Cores customizadas de ícones */
+    .si-blue {
+      background: rgba(9, 132, 227, 0.08) !important;
+      border-color: rgba(9, 132, 227, 0.18) !important;
+    }
+    .si-blue svg {
+      color: #0984e3 !important;
+    }
+    .sc:hover .si-blue {
+      box-shadow: 0 0 12px rgba(9, 132, 227, 0.25);
+    }
+
+    .si-green {
+      background: rgba(46, 204, 113, 0.08) !important;
+      border-color: rgba(46, 204, 113, 0.18) !important;
+    }
+    .si-green svg {
+      color: #2ecc71 !important;
+    }
+    .sc:hover .si-green {
+      box-shadow: 0 0 12px rgba(46, 204, 113, 0.25);
+    }
+
+    .si-red {
+      background: rgba(231, 76, 60, 0.08) !important;
+      border-color: rgba(231, 76, 60, 0.18) !important;
+    }
+    .si-red svg {
+      color: #e74c3c !important;
+    }
+    .sc:hover .si-red {
+      box-shadow: 0 0 12px rgba(231, 76, 60, 0.25);
+    }
+
+    .si-gold {
+      background: rgba(212, 175, 55, 0.08) !important;
+      border-color: rgba(212, 175, 55, 0.18) !important;
+    }
+    .si-gold svg {
+      color: var(--gold) !important;
+    }
+    .sc:hover .si-gold {
+      box-shadow: 0 0 12px rgba(212, 175, 55, 0.25);
     }
 
     .sl {
       grid-area: label;
-      font-size: 9px;
-      letter-spacing: 1px;
+      font-size: 10px;
+      letter-spacing: 1.2px;
       text-transform: uppercase;
       color: var(--text-m);
       font-weight: 600;
-      margin-bottom: 2px;
+      margin-bottom: 4px;
     }
 
     .sv {
       grid-area: value;
-      font-family: 'Elms Sans', sans-serif;
-      font-size: 20px;
+      font-family: 'Cinzel', Georgia, serif;
+      font-size: 24px;
       font-weight: 700;
       color: var(--text);
       line-height: 1.15;
+      text-shadow: 0 2px 10px rgba(0,0,0,0.15);
     }
 
     .sv.sm {
-      font-size: 15px;
+      font-size: 18px;
       margin-top: 1px;
     }
 
     .ss {
       grid-area: subtitle;
-      font-size: 10px;
+      font-size: 11px;
       color: var(--text-m);
-      margin-top: 6px;
+      margin-top: 8px;
+      font-family: 'Lato', sans-serif;
+      font-weight: 300;
     }
 
     .ss.text-warn {
       color: var(--warn) !important;
+      font-weight: 500;
     }
 
     .ss.text-err {
       color: var(--err) !important;
-    }
-
-    .si.si-err {
-      background: var(--err-bg) !important;
-    }
-
-    .si.si-err svg {
-      color: var(--err) !important;
+      font-weight: 500;
     }
 
     /* SECTION */
@@ -1813,16 +1872,18 @@
     }
 
     .scard {
-      background: var(--s2);
+      background: linear-gradient(135deg, rgba(255,255,255,0.015) 0%, rgba(255,255,255,0.005) 100%), var(--s2);
       border: 1px solid var(--gold-bd);
-      border-radius: var(--r);
+      border-radius: 14px;
       padding: 1.25rem;
-      transition: border-color .2s, transform .15s
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, .08);
     }
 
     .scard:hover {
-      border-color: var(--gold-bds);
-      transform: translateY(-2px)
+      border-color: rgba(212, 175, 55, 0.35);
+      transform: translateY(-4px);
+      box-shadow: 0 12px 25px rgba(0, 0, 0, .25), 0 0 15px rgba(212, 175, 55, 0.05);
     }
 
     .scard-hd {
@@ -5411,10 +5472,10 @@
       const cartValue = cartItems.reduce((a, item) => a + item.total, 0);
       return `
   <div class="sg g4">
-    <div class="sc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div><div class="sl">Produtos</div><div class="sv">${products.length}</div><div class="ss ${low > 0 ? 'text-warn' : ''}">${low} abaixo do mínimo</div></div>
-    <div class="sc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div class="sl">Itens em estoque</div><div class="sv">${its.toLocaleString('pt-BR')}</div><div class="ss">unidades totais</div></div>
-    <div class="sc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="sl">Valor em estoque</div><div class="sv sm">${fmt(val)}</div><div class="ss">inventário total</div></div>
-    <div class="sc"><div class="si ${out > 0 ? 'si-err' : ''}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div class="sl">Sem estoque</div><div class="sv" style="${out > 0 ? 'color:var(--err)' : ''}">${out}</div><div class="ss ${out > 0 ? 'text-err' : ''}">produto${out !== 1 ? 's' : ''} zerado${out !== 1 ? 's' : ''}</div></div>
+    <div class="sc"><div class="si si-gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div><div class="sl">Produtos</div><div class="sv">${products.length}</div><div class="ss ${low > 0 ? 'text-warn' : ''}">${low} abaixo do mínimo</div></div>
+    <div class="sc"><div class="si si-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div class="sl">Itens em estoque</div><div class="sv">${its.toLocaleString('pt-BR')}</div><div class="ss">unidades totais</div></div>
+    <div class="sc"><div class="si si-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="sl">Valor em estoque</div><div class="sv sm">${fmt(val)}</div><div class="ss">inventário total</div></div>
+    <div class="sc"><div class="si ${out > 0 ? 'si-red' : 'si-gold'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div><div class="sl">Sem estoque</div><div class="sv" style="${out > 0 ? 'color:var(--err)' : ''}">${out}</div><div class="ss ${out > 0 ? 'text-err' : ''}">produto${out !== 1 ? 's' : ''} zerado${out !== 1 ? 's' : ''}</div></div>
   </div>
   <div class="sec">
     <div class="sec-hd"><span class="sec-ttl">Inventário de produtos</span><span class="sec-sub">${list.length} produto${list.length !== 1 ? 's' : ''}</span></div>
@@ -5448,9 +5509,9 @@
       const td = log.filter(l => l.date === todayD());
       return `
   <div class="sg g3">
-    <div class="sc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/></svg></div><div class="sl">Total de saídas</div><div class="sv">${log.length}</div><div class="ss">movimentações</div></div>
-    <div class="sc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div class="sl">Itens retirados</div><div class="sv">${ti}</div><div class="ss">${td.length} saída${td.length !== 1 ? 's' : ''} hoje</div></div>
-    <div class="sc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="sl">Valor total saído</div><div class="sv sm">${fmt(ts)}</div><div class="ss">custo das saídas</div></div>
+    <div class="sc"><div class="si si-gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 0 1 0 8h-1"/></svg></div><div class="sl">Total de saídas</div><div class="sv">${log.length}</div><div class="ss">movimentações</div></div>
+    <div class="sc"><div class="si si-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div class="sl">Itens retirados</div><div class="sv">${ti}</div><div class="ss">${td.length} saída${td.length !== 1 ? 's' : ''} hoje</div></div>
+    <div class="sc"><div class="si si-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="sl">Valor total saído</div><div class="sv sm">${fmt(ts)}</div><div class="ss">custo das saídas</div></div>
   </div>
   <div class="sec">
     <div class="sec-hd"><span class="sec-ttl">Histórico de saídas</span><span class="sec-sub">${log.length} registro${log.length !== 1 ? 's' : ''}</span></div>
@@ -5484,8 +5545,8 @@
       </tr>`).join('');
       return `
   <div class="sg g3">
-    <div class="sc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 5H3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Z"/><path d="M8 11h8"/><path d="M8 15h5"/></svg></div><div class="sl">Pedidos salvos</div><div class="sv">${count}</div><div class="ss">pedidos aguardando resgate</div></div>
-    <div class="sc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg></div><div class="sl">Valor total aguardando</div><div class="sv sm">${fmt(totalSaved)}</div><div class="ss">valor dos pedidos salvos</div></div>
+    <div class="sc"><div class="si si-gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 5H3a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h18a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2Z"/><path d="M8 11h8"/><path d="M8 15h5"/></svg></div><div class="sl">Pedidos salvos</div><div class="sv">${count}</div><div class="ss">pedidos aguardando resgate</div></div>
+    <div class="sc"><div class="si si-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg></div><div class="sl">Valor total aguardando</div><div class="sv sm">${fmt(totalSaved)}</div><div class="ss">valor dos pedidos salvos</div></div>
   </div>
   <div class="sec">
     <div class="sec-hd"><span class="sec-ttl">Lista de pedidos salvos</span><span class="sec-sub">${count} pedido${count !== 1 ? 's' : ''}</span></div>
@@ -5510,9 +5571,9 @@
       const recent = entries.slice(-5).reverse();
       return `
   <div class="sg g3">
-    <div class="sc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 14l-4-4 4-4"/><path d="M6 10h11a4 4 0 0 1 0 8h-1"/></svg></div><div class="sl">Registros de entrada</div><div class="sv">${entries.length}</div><div class="ss">eventos de compra</div></div>
-    <div class="sc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div class="sl">Unidades recebidas</div><div class="sv">${totalEntries}</div><div class="ss">estoque adicionado</div></div>
-    <div class="sc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="sl">Valor recebido</div><div class="sv sm">${fmt(totalValue)}</div><div class="ss">investimento em estoque</div></div>
+    <div class="sc"><div class="si si-gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 14l-4-4 4-4"/><path d="M6 10h11a4 4 0 0 1 0 8h-1"/></svg></div><div class="sl">Registros de entrada</div><div class="sv">${entries.length}</div><div class="ss">eventos de compra</div></div>
+    <div class="sc"><div class="si si-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg></div><div class="sl">Unidades recebidas</div><div class="sv">${totalEntries}</div><div class="ss">estoque adicionado</div></div>
+    <div class="sc"><div class="si si-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div><div class="sl">Valor recebido</div><div class="sv sm">${fmt(totalValue)}</div><div class="ss">investimento em estoque</div></div>
   </div>
   <div class="sec">
     <div class="sec-hd"><span class="sec-ttl">Últimas entradas</span><span class="sec-sub">${recent.length} recente${recent.length !== 1 ? 's' : ''}</span></div>
@@ -5655,9 +5716,9 @@
       const estados = [...new Set(suppliers.map(s => s.city.split(',')[1]?.trim()).filter(Boolean))].length;
       return `
   <div class="sg g3">
-    <div class="sc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="sl">Fornecedores</div><div class="sv">${suppliers.length}</div><div class="ss">${suppliers.filter(s => s.status === 'ativo').length} ativos</div></div>
-    <div class="sc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div><div class="sl">Produtos vinculados</div><div class="sv">${products.length}</div><div class="ss">itens no catálogo</div></div>
-    <div class="sc"><div class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="sl">Estados cobertos</div><div class="sv">${estados}</div><div class="ss">regiões de entrega</div></div>
+    <div class="sc"><div class="si si-gold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div><div class="sl">Fornecedores</div><div class="sv">${suppliers.length}</div><div class="ss">${suppliers.filter(s => s.status === 'ativo').length} ativos</div></div>
+    <div class="sc"><div class="si si-blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg></div><div class="sl">Produtos vinculados</div><div class="sv">${products.length}</div><div class="ss">itens no catálogo</div></div>
+    <div class="sc"><div class="si si-green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div><div class="sl">Estados cobertos</div><div class="sv">${estados}</div><div class="ss">regiões de entrega</div></div>
   </div>
   <div class="sg2">
     ${suppliers.map(s => {
