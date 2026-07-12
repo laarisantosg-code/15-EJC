@@ -4701,8 +4701,8 @@
     function handleLogoUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
-      if (file.size > 2 * 1024 * 1024) {
-        notify('Imagem muito grande. Use um arquivo menor que 2MB.', 'error');
+      if (file.size > 5 * 1024 * 1024) {
+        notify('Imagem muito grande. Use um arquivo menor que 5MB.', 'error');
         return;
       }
       const reader = new FileReader();
