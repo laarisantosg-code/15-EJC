@@ -4080,6 +4080,7 @@
     <div class="modal" id="modal"></div>
   </div>
   <input type="file" id="json-restore-file" accept="application/json" style="display:none" onchange="handleJsonRestore(event)" />
+  <input type="file" id="csv-import-file" accept=".csv" style="display:none" onchange="handleCSVImport(event)" />
 
   <script>
     /* ══ STATE ══ */
@@ -4969,7 +4970,7 @@
       if (!tba) return;
       if (p === 'estoque') {
         currentPage = 1;
-        tba.innerHTML = `<button class="btn btn-gold" onclick="openAddProd()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Novo produto</button>`;
+        tba.innerHTML = `<button class="btn btn-ghost btn-sm" onclick="triggerCSVImport()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M12 11v6"/><path d="M9 14l3-3 3 3"/></svg>Importar CSV</button><button class="btn btn-gold btn-sm" onclick="openAddProd()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Novo produto</button>`;
       } else if (p === 'pedidos') {
         tba.innerHTML = '';
       } else if (p === 'fornecedores') tba.innerHTML = `<button class="btn btn-gold" onclick="openAddSupp()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Novo fornecedor</button>`;
@@ -5514,6 +5515,13 @@
                 <div class="csub">Todos os produtos com estoque e preços</div>
               </div>
               <button class="btn btn-ghost btn-sm" onclick="exportCSV()">Exportar</button>
+            </div>
+            <div class="config-row full">
+              <div>
+                <div class="clbl">Importar inventário CSV</div>
+                <div class="csub">Cadastra produtos em lote via arquivo .csv</div>
+              </div>
+              <button class="btn btn-gold btn-sm" onclick="triggerCSVImport()">Importar</button>
             </div>
             <div class="config-row full">
               <div>
@@ -6351,6 +6359,132 @@
       event.target.value = '';
     }
 
+    function triggerCSVImport() {
+      document.getElementById('csv-import-file').click();
+    }
+
+    async function handleCSVImport(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const text = reader.result;
+          const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
+          if (lines.length < 2) {
+            notify('O arquivo CSV deve conter um cabeçalho e pelo menos uma linha de dados.', 'err');
+            return;
+          }
+
+          // Auto-detecta separador (, ou ;)
+          let sep = ',';
+          if (lines[0].includes(';') && (lines[0].split(';').length > lines[0].split(',').length)) {
+            sep = ';';
+          }
+
+          const headers = parseCSVLine(lines[0], sep).map(h => h.toLowerCase().trim());
+          
+          // Mapeia índices de colunas
+          const mapCol = (names) => headers.findIndex(h => names.some(n => h.includes(n)));
+          
+          const idIdx = mapCol(['código', 'codigo', 'id']);
+          const nameIdx = mapCol(['nome', 'produto', 'name']);
+          const catIdx = mapCol(['categoria', 'cat']);
+          const descIdx = mapCol(['descrição', 'descricao', 'desc']);
+          const supplierIdx = mapCol(['fornecedor', 'supplier']);
+          const priceIdx = mapCol(['preço', 'preco', 'valor', 'price']);
+          const stockIdx = mapCol(['estoque', 'quantidade', 'qtd', 'stock']);
+          const minIdx = mapCol(['mínimo', 'minimo', 'alerta', 'min']);
+
+          let importedCount = 0;
+          let updatedCount = 0;
+
+          // Processa as linhas
+          for (let i = 1; i < lines.length; i++) {
+            const row = parseCSVLine(lines[i], sep);
+            if (row.length === 0 || (row.length === 1 && row[0] === '')) continue;
+
+            const valOf = (idx, defIdx) => {
+              const actualIdx = idx !== -1 ? idx : defIdx;
+              return row[actualIdx] !== undefined ? row[actualIdx].trim() : '';
+            };
+
+            let name = valOf(nameIdx, 1);
+            if (!name) continue;
+
+            let id = valOf(idIdx, 0);
+            if (!id) {
+              id = `MEU-${String(nProd).padStart(3, '0')}`;
+              nProd++;
+            }
+
+            let cat = valOf(catIdx, 2) || 'Geral';
+            let desc = valOf(descIdx, 3) || '';
+            let supplier = valOf(supplierIdx, 4) || 'Geral';
+            
+            const parseNum = (strVal, def) => {
+              if (!strVal) return def;
+              let clean = strVal.replace(/[R$\s]/g, '').replace(',', '.');
+              let val = parseFloat(clean);
+              return isNaN(val) ? def : val;
+            };
+
+            let price = parseNum(valOf(priceIdx, 5), 0);
+            let stock = parseInt(parseNum(valOf(stockIdx, 6), 0));
+            let min = parseInt(parseNum(valOf(minIdx, 7), 5));
+
+            const existingIdx = products.findIndex(p => String(p.id) === String(id));
+            const newProduct = { id, name, cat, desc, supplier, price, stock, min };
+
+            if (existingIdx !== -1) {
+              products[existingIdx] = newProduct;
+              updatedCount++;
+            } else {
+              products.push(newProduct);
+              importedCount++;
+            }
+
+            if (cat && !categories.includes(cat)) categories.push(cat);
+            
+            if (supabaseClient) {
+              await syncProductToSupabase(newProduct);
+            }
+          }
+
+          saveDB();
+          updateCounters();
+          render();
+          notify(`Importação concluída! ${importedCount} novos, ${updatedCount} atualizados.`, 'ok');
+
+        } catch (err) {
+          notify('Falha ao processar arquivo CSV.', 'err');
+          console.error(err);
+        }
+      };
+
+      reader.readAsText(file, 'UTF-8');
+      event.target.value = '';
+    }
+
+    function parseCSVLine(text, separator = ',') {
+      let p = '', r = [];
+      let q = false;
+      for (let i = 0; i < text.length; i++) {
+        let c = text[i];
+        if (c === '"') {
+          q = !q;
+        } else if (c === separator && !q) {
+          r.push(p.trim().replace(/^"|"$/g, ''));
+          p = '';
+        } else {
+          p += c;
+        }
+      }
+      r.push(p.trim().replace(/^"|"$/g, ''));
+      return r;
+    }
+
     /* ══ MODAL ══ */
     function showOv() { document.getElementById('overlay').style.display = 'flex' }
     function closeModal() { document.getElementById('overlay').style.display = 'none' }
@@ -6370,7 +6504,7 @@
     checkAuth();
     if (authenticated) {
       if (page === 'estoque') {
-        document.getElementById('tba').innerHTML = `<button class="btn btn-gold" onclick="openAddProd()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Novo produto</button>`;
+        document.getElementById('tba').innerHTML = `<button class="btn btn-ghost btn-sm" onclick="triggerCSVImport()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M12 11v6"/><path d="M9 14l3-3 3 3"/></svg>Importar CSV</button><button class="btn btn-gold" onclick="openAddProd()"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>Novo produto</button>`;
       } else {
         document.getElementById('tba').innerHTML = '';
       }
