@@ -1,0 +1,6 @@
+.env
+tools/tmp_script_*
+C:\Users\Murillo Silva\.gemini\antigravity-ide\brain\*
+*.log
+
+.vercel
