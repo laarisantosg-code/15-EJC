@@ -4192,6 +4192,20 @@
   <div class="overlay" id="overlay" style="display:none" onclick="ocl(event)">
     <div class="modal" id="modal"></div>
   </div>
+
+  <!-- CONFIRM OVERLAY -->
+  <div id="confirm-overlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); backdrop-filter:blur(8px); z-index:9999999; align-items:center; justify-content:center; padding:1.5rem;">
+    <div id="confirm-modal" style="background:#121216; border:1px solid rgba(255,255,255,0.08); border-radius:14px; padding:1.5rem; width:100%; max-width:400px; box-shadow:0 20px 40px rgba(0,0,0,0.6); display:flex; flex-direction:column; gap:1.25rem;">
+      <div>
+        <h3 id="confirm-title" style="font-family:'Cinzel',serif; font-size:1.15rem; color:var(--gold); margin:0 0 0.5rem 0; letter-spacing:0.5px;">Confirmar Ação</h3>
+        <p id="confirm-message" style="font-family:'Lato',sans-serif; font-size:0.875rem; color:rgba(255,255,255,0.75); margin:0; line-height:1.5;"></p>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:0.75rem;">
+        <button id="confirm-btn-cancel" class="btn btn-ghost btn-sm" style="padding:6px 14px; font-size:12px; height:auto; min-height:auto; width:auto; border-radius:8px;">Cancelar</button>
+        <button id="confirm-btn-ok" class="btn btn-sm" style="padding:6px 14px; font-size:12px; height:auto; min-height:auto; width:auto; min-width:90px; border-radius:8px;"></button>
+      </div>
+    </div>
+  </div>
   <input type="file" id="json-restore-file" accept="application/json" style="display:none" onchange="handleJsonRestore(event)" />
   <input type="file" id="csv-import-file" accept=".csv" style="display:none" onchange="handleCSVImport(event)" />
 
@@ -5126,6 +5140,37 @@
       setTimeout(() => printWindow.print(), 300);
     }
 
+    /* ══ CUSTOM CONFIRM ══ */
+    function customConfirm(title, message, okText = 'Confirmar', okClass = 'btn-gold') {
+      return new Promise((resolve) => {
+        const overlay = document.getElementById('confirm-overlay');
+        const titleEl = document.getElementById('confirm-title');
+        const msgEl = document.getElementById('confirm-message');
+        const btnCancel = document.getElementById('confirm-btn-cancel');
+        const btnOk = document.getElementById('confirm-btn-ok');
+
+        titleEl.textContent = title;
+        msgEl.textContent = message;
+        btnOk.textContent = okText;
+        
+        btnOk.className = 'btn btn-sm ' + okClass;
+        overlay.style.display = 'flex';
+
+        function cleanup(result) {
+          overlay.style.display = 'none';
+          btnCancel.onclick = null;
+          btnOk.onclick = null;
+          resolve(result);
+        }
+
+        btnCancel.onclick = () => cleanup(false);
+        btnOk.onclick = () => cleanup(true);
+        overlay.onclick = (e) => {
+          if (e.target === overlay) cleanup(false);
+        };
+      });
+    }
+
     /* ══ NOTIFY ══ */
     function notify(msg, type = 'info') {
       const d = document.createElement('div');
@@ -5447,7 +5492,17 @@
     ${count ? `<div class="tw"><table><thead><tr><th>Código</th><th>Salvo em</th><th>Cliente</th><th>Itens</th><th>Total</th><th>Ações</th></tr></thead><tbody>${rows}</tbody></table></div>` : `<div class="empty"><div class="empty-i">◇</div><div class="empty-t">Nenhum pedido salvo disponível</div></div>`}
   </div>`;
     }
-    function clearLog() { if (!log.length) return; if (!confirm('Limpar todo o histórico de saídas?')) return; log = []; saveDB(); if (supabaseClient) clearLogFromSupabase(); notify('Histórico de saídas limpo', 'ok'); render(); document.getElementById('tba').innerHTML = '' }
+    async function clearLog() {
+      if (!log.length) return;
+      const ok = await customConfirm('Limpar Histórico', 'Deseja realmente limpar todo o histórico de saídas do sistema?', 'Limpar', 'btn-red');
+      if (!ok) return;
+      log = [];
+      saveDB();
+      if (supabaseClient) clearLogFromSupabase();
+      notify('Histórico de saídas limpo', 'ok');
+      render();
+      document.getElementById('tba').innerHTML = '';
+    }
 
     function renderEntradas() {
       const totalEntries = entries.reduce((a, e) => a + e.qty, 0);
@@ -5514,11 +5569,22 @@
       render();
     }
 
-    function clearEntries() { if (!entries.length) return; if (!confirm('Limpar todo o histórico de entradas?')) return; entries = []; saveDB(); notify('Histórico de entradas limpo', 'ok'); render(); }
+    async function clearEntries() {
+      if (!entries.length) return;
+      const ok = await customConfirm('Limpar Histórico', 'Deseja realmente limpar todo o histórico de entradas?', 'Limpar', 'btn-red');
+      if (!ok) return;
+      entries = [];
+      saveDB();
+      notify('Histórico de entradas limpo', 'ok');
+      render();
+    }
 
     async function clearAllSystemData() {
-      if (!confirm('ATENÇÃO: Isso irá excluir permanentemente TODOS os dados do sistema (produtos, fornecedores, entradas, saídas, categorias, tags, pedidos salvos) de forma irreversível. Deseja continuar?')) return;
-      if (!confirm('Tem certeza absoluta? Essa ação NÃO poderá ser desfeita e apagará os dados na nuvem também.')) return;
+      const ok1 = await customConfirm('Resetar Sistema', 'ATENÇÃO: Isso irá excluir permanentemente TODOS os dados do sistema (produtos, fornecedores, entradas, saídas, categorias, tags, pedidos salvos) de forma irreversível. Deseja continuar?', 'Sim, continuar', 'btn-red');
+      if (!ok1) return;
+      
+      const ok2 = await customConfirm('Tem certeza absoluta?', 'Esta ação apagará permanentemente todos os dados na nuvem (Supabase) e locais. Essa ação não poderá ser desfeita.', 'Sim, deletar tudo', 'btn-red');
+      if (!ok2) return;
 
       // 1. Limpar localmente
       products = [];
