@@ -4848,23 +4848,59 @@
     function handleLogoUpload(event) {
       const file = event.target.files[0];
       if (!file) return;
-      if (file.size > 10 * 1024 * 1024) {
-        notify('Imagem muito grande. Use um arquivo menor que 10MB.', 'error');
+      if (file.size > 15 * 1024 * 1024) {
+        notify('Imagem muito grande. Use um arquivo menor que 15MB.', 'err');
         return;
       }
       const reader = new FileReader();
       reader.onload = function(e) {
-        const base64 = e.target.result;
-        localStorage.setItem('aurum_company_logo', base64);
-        const preview = document.getElementById('company-logo-preview');
-        if (preview) {
-          preview.innerHTML = `<img src="${base64}" style="width:100%;height:100%;object-fit:cover;">`;
-        }
-        applySidebarLogo();
-        notify('Logo atualizado com sucesso!', 'success');
+        const img = new Image();
+        img.onerror = function() {
+          notify('Falha ao processar o formato da imagem.', 'err');
+        };
+        img.onload = function() {
+          try {
+            const canvas = document.createElement('canvas');
+            const max_size = 200; // Resolução ideal compacta para avatares/logotipos
+            let width = img.width;
+            let height = img.height;
+            
+            if (width > height) {
+              if (width > max_size) {
+                height *= max_size / width;
+                width = max_size;
+              }
+            } else {
+              if (height > max_size) {
+                width *= max_size / height;
+                height = max_size;
+              }
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Converte para JPEG com boa qualidade para manter o arquivo extremamente leve (~10-20KB)
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+            localStorage.setItem('aurum_company_logo', compressedBase64);
+            
+            const preview = document.getElementById('company-logo-preview');
+            if (preview) {
+              preview.innerHTML = `<img src="${compressedBase64}" style="width:100%;height:100%;object-fit:cover;">`;
+            }
+            applySidebarLogo();
+            notify('Logo atualizado com sucesso!', 'ok');
+          } catch (err) {
+            console.error('Erro ao salvar logo:', err);
+            notify('Erro ao salvar imagem no armazenamento.', 'err');
+          }
+        };
+        img.src = e.target.result;
       };
       reader.readAsDataURL(file);
-      // Reset input so same file can be re-selected
+      // Reset input para permitir re-seleção
       event.target.value = '';
     }
 
