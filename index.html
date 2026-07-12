@@ -5525,6 +5525,13 @@
             </div>
             <div class="config-row full">
               <div>
+                <div class="clbl">Baixar modelo CSV</div>
+                <div class="csub">Modelo de planilha para importação de produtos</div>
+              </div>
+              <button class="btn btn-ghost btn-sm" onclick="downloadCSVTemplate()">Baixar modelo</button>
+            </div>
+            <div class="config-row full">
+              <div>
                 <div class="clbl">Exportar histórico de saídas</div>
                 <div class="csub">Log completo de movimentações</div>
               </div>
@@ -6357,6 +6364,25 @@
       };
       reader.readAsText(file, 'UTF-8');
       event.target.value = '';
+    }
+
+    function downloadCSVTemplate() {
+      const csvContent = 'Código;Nome;Categoria;Descrição;Fornecedor;Preço;Estoque;Mínimo\n' +
+        'MEU-001;Refrigerante Lata;Bebidas;Refrigerante de cola 350ml;Distribuidora Coca;5,00;100;15\n' +
+        'MEU-002;Chocolate Barra;Doces;Chocolate ao leite 90g;Distribuidora Nestlé;7,50;50;10\n' +
+        'MEU-003;Salgadinho Piraque;Salgados;Salgadinho de trigo sabor queijo 100g;Distribuidora Piraque;4,20;80;12\n' +
+        ';Bala de Goma;Doces;Pacote de bala de gama de frutas;Distribuidora Doces;2,50;120;20';
+      
+      const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'modelo_importacao.csv';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      notify('Modelo CSV baixado com sucesso', 'ok');
     }
 
     function triggerCSVImport() {
