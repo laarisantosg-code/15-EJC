@@ -4025,7 +4025,7 @@
     <!-- SIDEBAR -->
     <aside class="sidebar">
       <div class="sb-brand" style="display: flex; align-items: center; gap: 10px; padding: 1.25rem 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.06);">
-        <div class="company-avatar-circle" style="font-family: 'Cinzel', serif; width: 34px; height: 34px; font-size: 0.95rem; border-radius: 8px; background: rgba(200, 168, 75, 0.15); border: 1.5px solid var(--gold); display: flex; align-items: center; justify-content: center; color: var(--gold); font-weight: bold; flex-shrink: 0;">✝</div>
+        <div id="sb-company-logo" class="company-avatar-circle" style="font-family: 'Cinzel', serif; width: 34px; height: 34px; font-size: 0.95rem; border-radius: 8px; background: rgba(200, 168, 75, 0.15); border: 1.5px solid var(--gold); display: flex; align-items: center; justify-content: center; color: var(--gold); font-weight: bold; flex-shrink: 0; overflow: hidden;">✝</div>
         <div style="min-width: 0;">
           <div class="sb-name" id="sb-brand-name" style="font-size: 14px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.2;">Meu Estoque</div>
           <div style="font-size: 9.5px; color: var(--gold); font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 1px; line-height: 1;">15° EJC</div>
@@ -4477,6 +4477,18 @@
     /* ══ AUTHENTICATION ══ */
     let authenticated = (sessionStorage.getItem('meuestoque_logged') || sessionStorage.getItem('aurum_logged')) === 'true';
 
+    function applySidebarLogo() {
+      const sbLogo = document.getElementById('sb-company-logo');
+      if (sbLogo) {
+        const storedLogo = localStorage.getItem('aurum_company_logo');
+        if (storedLogo) {
+          sbLogo.innerHTML = `<img src="${storedLogo}" style="width:100%;height:100%;object-fit:cover;">`;
+        } else {
+          sbLogo.innerHTML = '✝';
+        }
+      }
+    }
+
     function checkAuth() {
       const wrapper = document.getElementById('login-wrapper');
       const appLayout = document.getElementById('app-layout');
@@ -4494,6 +4506,9 @@
         if (compEl) compEl.textContent = cfg.empresa;
         const brandNameEl = document.getElementById('sb-brand-name');
         if (brandNameEl) brandNameEl.textContent = cfg.empresa.replace(/\s+(ltda\.?|ltd\.?)$/i, '');
+
+        // Apply logo in sidebar
+        applySidebarLogo();
 
         // Refresh date in sidebar
         const dateEl = document.getElementById('sb-date');
@@ -4713,6 +4728,7 @@
         if (preview) {
           preview.innerHTML = `<img src="${base64}" style="width:100%;height:100%;object-fit:cover;">`;
         }
+        applySidebarLogo();
         notify('Logo atualizado com sucesso!', 'success');
       };
       reader.readAsDataURL(file);
@@ -4724,9 +4740,9 @@
       localStorage.removeItem('aurum_company_logo');
       const preview = document.getElementById('company-logo-preview');
       if (preview) {
-        const cfg = JSON.parse(localStorage.getItem('aurum_config') || '{}');
         preview.innerHTML = (cfg.empresa || 'ME').slice(0, 2).toUpperCase();
       }
+      applySidebarLogo();
       notify('Logo removido.', 'info');
     }
 
@@ -5927,6 +5943,10 @@
       document.getElementById('sb-company').textContent = cfg.empresa;
       const brandNameEl = document.getElementById('sb-brand-name');
       if (brandNameEl) brandNameEl.textContent = cfg.empresa.replace(/\s+(ltda\.?|ltd\.?)$/i, '');
+      const preview = document.getElementById('company-logo-preview');
+      if (preview && !localStorage.getItem('aurum_company_logo')) {
+        preview.innerHTML = (cfg.empresa || 'ME').slice(0, 2).toUpperCase();
+      }
       notify('Configurações salvas com sucesso', 'ok');
       render();
     }
